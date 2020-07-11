@@ -30,12 +30,19 @@ app.post("/messages", (req, res) => {
   messages.push(newMessage);
 })
 
-app.get("/messages/:id", function (req, res) {
+app.get("/messages/:id", (req, res) => {
   const messageId = Number(req.query);
-  const requestedMessage = messages.find(message => message.id === messageId)
+  const requestedMessage = messages.find(message => message.id == messageId)
 
-  res.send(messages);
+  res.send(requestedMessage);
 });
+
+app.delete("/messages/:id", (req, res ) => {
+  const messageID = Number(req.query)
+  const newMessages = messages.filter(message => message.id !== messageID)
+
+  res.send(messages)
+})
 
 const port = process.env.PORT || 3000;
 
