@@ -31,17 +31,17 @@ app.post("/messages", (req, res) => {
 })
 
 app.get("/messages/:id", (req, res) => {
-  const messageId = Number(req.query);
+  const messageId = Number(req.params.id);
   const requestedMessage = messages.find(message => message.id == messageId)
 
   res.send(requestedMessage);
 });
 
 app.delete("/messages/:id", (req, res ) => {
-  const messageID = Number(req.query)
-  const newMessages = messages.filter(message => message.id !== messageID)
+  const messageID = Number(req.params.id)
+  const updatedMessages = messages.filter(message => message.id !== messageID)
 
-  res.send(messages)
+  res.send(updatedMessages)
 })
 
 const port = process.env.PORT || 3000;
