@@ -1,10 +1,14 @@
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser")
+// const bodyParser = require("body-parser");
 
 const app = express();
 
-app.use(cors(), bodyParser.json());
+app.use(cors());
+
+// app.use(cors(), bodyParser.json()); (Body parser is now included in Express, just need the following 2 lines)
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 const welcomeMessage = {
   id: 0,
@@ -21,31 +25,57 @@ app.get("/", function (request, response) {
   response.sendFile(__dirname + "/index.html");
 });
 
-app.get("/messages", function (req, res) {
+app.post("/messages", (req, res) => {
+  const newMessage = req.body;
+
+  let d = new Date();
+  let timeSent = d.getTime();
+  newMessage.timeSent = timeSent;
+
+  if (!req.body.from || !req.body.text) {
+    return res.sendStatus(400);
+  }
+
+  messages.push(newMessage);
+  res.status(201).send(messages);
+});
+
+app.get("/messages", (req, res) => {
   res.send(messages);
 });
 
-app.post("/messages", (req, res) => {
-  const newMessage = req.body;
-  messages.push(newMessage);
-})
+app.get("/messages/search", (req, res) => {
+  const filterdMessages = messages.filter((msg) =>
+    msg.text.includes(req.query.text)
+  );
+  res.send(filterdMessages);
+});
+
+app.get("/messages/latest", (req, res) => {
+  const lastTenMessages = messages.slice(-10, messages.length);
+  res.send(lastTenMessages);
+});
 
 app.get("/messages/:id", (req, res) => {
-  const messageId = Number(req.params.id);
-  const requestedMessage = messages.find(message => message.id == messageId)
-
+  const messageId = req.params.id;
+  const requestedMessage = messages.find((msg) => String(msg.id) == req.params);
   res.send(requestedMessage);
 });
 
-app.delete("/messages/:id", (req, res ) => {
-  const messageID = Number(req.params.id)
-  const updatedMessages = messages.filter(message => message.id !== messageID)
+app.delete("/messages/:id", (req, res) => {
+  const messageId = req.params.id;
+  const requestedMessage = messages.find(
+    (msg) => String(msg.id) !== req.params
+  );
+  res.send(requestedMessage);
+});
 
-  res.send(updatedMessages)
-})
+app.put("/messages/:id", (req, res) => {
+  const messageId = req.params.id;
+  const requestedMessage = messages.find(
+    (msg) => String(msg.id) !== req.params
+  );
+  res.send(requestedMessage);
+});
 
-const port = process.env.PORT || 3000;
-
-console.log(`listening on port ${port}`)
-
-app.listen(port);
+app.listen(process.env.PORT);
